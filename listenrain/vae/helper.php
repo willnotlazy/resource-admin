@@ -106,7 +106,7 @@ function vae_get_admin_group_info($id){
 
 //读取文章分类列表
 function vae_get_article_cate(){
-    $cate = \think\Db::name('article_cate')->order('create_time asc')->select();
+    $cate = \think\Db::connect(\think\Config::get('resource'))->name('user_resource_classify')->select();
     return $cate;
 }
 
@@ -114,16 +114,16 @@ function vae_get_article_cate(){
 function vae_get_article($cate_id=""){
     $where = array();
     if(!empty($cate_id)) {
-        $where['article_cate_id'] = $cate_id;
+        $where['classifyID'] = $cate_id;
     }
-    $article = \think\Db::name('article')->where($where)->order('create_time desc')->paginate(\think\Config::get('paginate.list_rows'));
+    $article = \think\Db::connect(\think\Config::get('resource'))->where($where)->paginate(\think\Config::get('paginate.list_rows'));
     return $article;
 }
 
 //读取指定文章的详情
 function vae_get_article_info($id)
 {
-    $article = \think\Db::name('article')->where(['id'=>$id])->find();
+    $article = \think\Db::connect(\think\Config::get('resource'))->name('user_post')->where(['postID'=>$id])->find();
     if(empty($article)) {
         return show(0,'文章不存在');
     }
@@ -138,14 +138,13 @@ function vae_set_recursion($result,$pid=0,$format="L "){
     foreach ($result as $k => $v){
         if($v['pid']==$pid){
             if($pid!=0){
-                $v['title']=$format.$v['title'];
+                $v['name']=$format.$v['name'];
             }
             /*将该类别的数据放入list中*/
             $list[]=$v;
-            vae_set_recursion($result,$v['id'],"  ".$format);
+            vae_set_recursion($result,$v['classifyID'],"  ".$format);
         }
     }
- 
     return $list;
 }
 

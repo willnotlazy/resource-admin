@@ -10,32 +10,11 @@
 // +---------------------------------------------------------------------
 namespace app\admin\controller;
 use vae\controller\AdminCheckAuth;
-use think\Db;
 use app\common\model\Article as ArticleModel;
+use think\Config;
 
 class ArticleController extends AdminCheckAuth
 {
-    protected $array = [
-        'type'        => 'mysql',
-        // 数据库连接DSN配置
-        'dsn'         => '',
-        // 服务器地址
-        'hostname'    => '127.0.0.1',
-        // 数据库名
-        'database'    => 'resource',
-        // 数据库用户名
-        'username'    => 'root',
-        // 数据库密码
-        'password'    => '519478450',
-        // 数据库连接端口
-        'hostport'    => '3306',
-        // 数据库连接参数
-        'params'      => [],
-        // 数据库编码默认采用utf8
-        'charset'     => 'utf8',
-        // 数据库表前缀
-        'prefix'      => 'res_',
-    ];
     public function index()
     {
         return view();
@@ -60,7 +39,15 @@ class ArticleController extends AdminCheckAuth
     			->order('a.create_time desc')
                 ->where($where)
     			->paginate($rows,false,['query'=>$param]);
-
+        $content = \think\Db::connect(Config::get('resource'))
+                                ->name('user_post')
+                                ->field('a.*,u.username as user,c.name as classifyName,d.name as pidName')
+                                ->alias('a')
+                                ->join('res_user u','a.authorID = u.id')
+                                ->join('res_user_resource_classify c','a.classify = c.classifyID')
+                                ->join('res_user_resource_classify d', 'a.second_classify = d.classifyID')
+                                ->order('a.postTime desc')
+                                ->paginate($rows,false,['query'=>$param]);
     	return vae_assign_table(0,'',$content);
     }
 
@@ -75,13 +62,17 @@ class ArticleController extends AdminCheckAuth
     {
     	if($this->request->isPost()){
     		$param = vae_get_param();
-    		$result = $this->validate($param, 'app\admin\validate\Article.add');
-            if ($result !== true) {
-                return vae_assign(0,$result);
-            } else {
-                \think\loader::model('Article')->strict(false)->field(true)->insert($param);
-                return vae_assign();
-            }
+    		if (in_array($param['second_classify'],[1,2,3,4,5,6,7,8,9,10]))
+    		    return vae_assign('','请选择子分类');
+    		$classify = \think\Db::connect(Config::get('resource'))->name('user_resource_classify')->where('classifyID',$param['second_classify'])->find();
+    		$param['classify']       = $classify['pid'];
+    		$param['cover']     = 'http://admin.dev-resource.com' . str_replace('\\','/',$param['cover']);
+    		$param['checked']   = vae_get_login_admin()['nickname'];
+            $param['authorID']  = 0;
+            $param['postTime']  = time();
+    		unset($param['file']);
+            \think\Db::connect(Config::get('resource'))->name('user_post')->strict(false)->field(true)->insert($param);
+            return vae_assign();
     	}
     }
 
@@ -96,14 +87,16 @@ class ArticleController extends AdminCheckAuth
     {
         if($this->request->isPost()){
             $param = vae_get_param();
-            $result = $this->validate($param, 'app\admin\validate\Article.edit');
-            if ($result !== true) {
-                return vae_assign(0,$result);
-            } else {
-                \think\loader::model('Article')->where(['id'=>$param['id']])->strict(false)->field(true)->update($param);
-                \think\Cache::clear('VAE_ARTICLE_INFO');
-                return vae_assign();
-            }
+            var_dump($param);
+            $data = [
+                'couldPost' => $param['couldPost'],
+                'checked'   => vae_get_login_admin()['nickname']
+            ];
+            $id = $param['postID'];
+            unset($param);
+            \think\Db::connect(Config::get('resource'))->name('user_post')->where(['postID'=>$id])->strict(false)->field(true)->update($data);
+            \think\Cache::clear('VAE_ARTICLE_INFO');
+            return vae_assign();
         }
     }
 

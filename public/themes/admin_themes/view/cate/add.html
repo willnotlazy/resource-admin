@@ -17,7 +17,7 @@
       <select name="pid" lay-verify="required" lay-search="">
         <option value="0">作为顶级分类</option>
         {volist name=":vae_set_recursion(vae_get_article_cate())" id="v"}
-        <option value="{$v.id}" {eq name="pid" value="$v.id"}selected=""{/eq}>{$v.title}</option>
+        <option value="{$v.classifyID}" {eq name="pid" value="$v.classifyID"}selected=""{/eq}>{$v.name}</option>
         {/volist}
       </select>
     </div>

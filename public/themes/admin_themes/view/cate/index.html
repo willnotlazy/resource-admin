@@ -42,20 +42,20 @@ layui.config({
         ,idField:'id'
         ,url:'/admin/cate/getCateList'
         ,cellMinWidth: 100
-        ,treeId:'id'//树形id字段名称
+        ,treeId:'classifyID'//树形id字段名称
         ,treeUpId:'pid'//树形父id字段名称
-        ,treeShowName:'title'//以树形式显示的字段
+        ,treeShowName:'name'//以树形式显示的字段
         ,height:'full-60'
         ,cols: [[
-            {field:'id',width:80, title: 'ID', align:'center'}
-            ,{field:'title', edit:'text',width:300, title: '名称', edit:"text"}
+            {field:'classifyID',width:80, title: 'ID', align:'center'}
+            ,{field:'name', edit:'text',width:300, title: '名称', edit:"text"}
             ,{field:'pid', title: '父级ID', edit:"text",width:80, align:'center'}
-            ,{field:'keywords', title: '关键词', edit:"text", align:'center'}
-            ,{field:'desc', title: '描述', edit:"text", align:'center'}
+            // ,{field:'keywords', title: '关键词', edit:"text", align:'center'}
+            // ,{field:'desc', title: '描述', edit:"text", align:'center'}
             ,{width:150,title: '', align:'center'
                 ,templet: function(d){
                 var html='';
-                var addBtn='<a class="layui-btn layui-btn-primary layui-btn-xs" vaeyo_tab vae-id="1007" vae-title="添加分类" vae-src="/admin/cate/add/pid/'+d.id+'">添加</a>';
+                var addBtn='<a class="layui-btn layui-btn-primary layui-btn-xs" vaeyo_tab vae-id="1007" vae-title="添加分类" vae-src="/admin/cate/add/pid/'+d.classifyID+'">添加</a>';
                 var delBtn='<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>';
                 return addBtn+delBtn;
               }

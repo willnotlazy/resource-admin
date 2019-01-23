@@ -10,6 +10,7 @@
 // +---------------------------------------------------------------------
 namespace app\admin\controller;
 use vae\controller\AdminCheckAuth;
+use think\Config;
 
 class CateController extends AdminCheckAuth
 {
@@ -22,6 +23,8 @@ class CateController extends AdminCheckAuth
     public function getCateList()
     {
     	$cate = \think\Db::name('ArticleCate')->order('create_time asc')->select();
+    	$cate = \think\Db::connect(Config::get('resource'))->name('user_resource_classify')
+          ->select();
     	return vae_assign(0,'',$cate);
     }
 

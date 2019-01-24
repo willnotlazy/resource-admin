@@ -32,22 +32,27 @@ class ArticleController extends AdminCheckAuth
             $where['a.article_cate_id'] = $param['article_cate_id'];
         }
         $rows = empty($param['limit']) ? \think\Config::get('paginate.list_rows') : $param['limit'];
-        $content = \think\loader::model('Article')
-                ->field('*,w.id as cate_id,a.id as id,w.title as cate_title,a.title as title')
-                ->alias('a')
-                ->join('article_cate w','a.article_cate_id = w.id')
-    			->order('a.create_time desc')
-                ->where($where)
-    			->paginate($rows,false,['query'=>$param]);
         $content = \think\Db::connect(Config::get('resource'))
                                 ->name('user_post')
-                                ->field('a.*,u.username as user,c.name as classifyName,d.name as pidName')
+                                ->field('a.*,c.name as classifyName,d.name as pidName')
                                 ->alias('a')
-                                ->join('res_user u','a.authorID = u.id')
                                 ->join('res_user_resource_classify c','a.classify = c.classifyID')
                                 ->join('res_user_resource_classify d', 'a.second_classify = d.classifyID')
                                 ->order('a.postTime desc')
-                                ->paginate($rows,false,['query'=>$param]);
+                                ->paginate($rows,false,['query'=>$param])
+                                ->each(function ($item, $key){
+                                   if ($item['authorID'] == 0)
+                                   {
+                                       $item['author'] = 'admin';
+                                   }
+                                   else
+                                   {
+                                       $authorID = $item['authorID'];
+                                       $author = \think\Db::connect(Config::get('resource'))->name('user')->where('id',$authorID)->find()['username'];
+                                       $item['author'] = $author;
+                                   }
+                                   return $item;
+                                });
     	return vae_assign_table(0,'',$content);
     }
 
@@ -66,7 +71,7 @@ class ArticleController extends AdminCheckAuth
     		    return vae_assign('','请选择子分类');
     		$classify = \think\Db::connect(Config::get('resource'))->name('user_resource_classify')->where('classifyID',$param['second_classify'])->find();
     		$param['classify']       = $classify['pid'];
-    		$param['cover']     = 'http://admin.dev-resource.com' . str_replace('\\','/',$param['cover']);
+    		$param['cover']     = $this->request->domain() . str_replace('\\','/',$param['cover']);
     		$param['checked']   = vae_get_login_admin()['nickname'];
             $param['authorID']  = 0;
             $param['postTime']  = time();
@@ -87,16 +92,20 @@ class ArticleController extends AdminCheckAuth
     {
         if($this->request->isPost()){
             $param = vae_get_param();
-            var_dump($param);
             $data = [
-                'couldPost' => $param['couldPost'],
-                'checked'   => vae_get_login_admin()['nickname']
+                'couldPost'    => $param['couldPost']
+                ,'checked'     => vae_get_login_admin()['nickname']
+                ,'checkStatus' => 1
             ];
+            if ($param['couldPost'] == 0) {
+                $data['checkStatus'] = -1;
+                $data['failReason'] = $param['reason'];
+            }
             $id = $param['postID'];
             unset($param);
             \think\Db::connect(Config::get('resource'))->name('user_post')->where(['postID'=>$id])->strict(false)->field(true)->update($data);
             \think\Cache::clear('VAE_ARTICLE_INFO');
-            return vae_assign();
+            return vae_assign(1,'提交成功');
         }
     }
 

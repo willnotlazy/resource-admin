@@ -67,6 +67,20 @@
       <input type="radio" name="couldPost" value="0" title="拒绝" {eq name="$article.couldPost" value="0"}checked{/eq}>
     </div>
   </div>
+
+  <div class="layui-form-item layui-hide textarea-reason">
+    <label for="" class="layui-form-label">拒绝原因</label>
+    <div class="layui-input-block">
+      <textarea type="text" name="reason" class="layui-textarea"></textarea>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label for="" class="layui-form-label">是否有效</label>
+    <div class="layui-input-block">
+      <input type="radio" name="isEffective" value="1" title="有效" {eq name="$article.isEffective" value="1"}checked{/eq}>
+      <input type="radio" name="isEffective" value="0" title="无效" {eq name="$article.isEffective" value="0"}checked{/eq}>
+    </div>
+  </div>
   <div class="layui-form-item">
     <input type="hidden" name="postID" value="{$article.postID}">
     <div class="layui-input-block">
@@ -86,6 +100,23 @@ layui.config({
   ,$ = layui.$
   ,upload = layui.upload
   ,vae = layui.vaeyo;
+
+  $(function () {
+      if ($("input[name='couldPost']:checked").val() == 0)
+      {
+          $('.textarea-reason').removeClass('layui-hide');
+      }
+  });
+  $(".layui-unselect").click(function () {
+      if($("input[name='couldPost']:checked").val() == 0)
+      {
+          $('.textarea-reason').removeClass('layui-hide');
+      }
+      if($("input[name='couldPost']:checked").val() == 1)
+      {
+          $('.textarea-reason').addClass('layui-hide')
+      }
+  });
 
   //头像上传
   var uploadInst = upload.render({
@@ -121,7 +152,6 @@ layui.config({
     })
     return false;
   });
-  
 });
 </script>
 

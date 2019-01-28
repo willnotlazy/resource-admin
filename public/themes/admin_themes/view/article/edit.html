@@ -64,7 +64,7 @@
     <label class="layui-form-label">允许发布</label>
     <div class="layui-input-block">
       <input type="radio" name="couldPost" value="1" title="允许" {eq name="$article.couldPost" value="1"}checked{/eq}>
-      <input type="radio" name="couldPost" value="0" title="拒绝" {eq name="$article.couldPost" value="0"}checked{/eq}>
+      <input type="radio" name="couldPost" value="-1" title="拒绝" {eq name="$article.couldPost" value="-1"}checked{/eq}>
     </div>
   </div>
 
@@ -102,13 +102,13 @@ layui.config({
   ,vae = layui.vaeyo;
 
   $(function () {
-      if ($("input[name='couldPost']:checked").val() == 0)
+      if ($("input[name='couldPost']:checked").val() == -1)
       {
           $('.textarea-reason').removeClass('layui-hide');
       }
   });
   $(".layui-unselect").click(function () {
-      if($("input[name='couldPost']:checked").val() == 0)
+      if($("input[name='couldPost']:checked").val() == -1)
       {
           $('.textarea-reason').removeClass('layui-hide');
       }

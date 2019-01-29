@@ -22,7 +22,7 @@
   <img src='{{d.cover}}' height="25"/>
 </script>
 <script type="text/html" id="status">
-  <i class="layui-icon {{#  if(d.couldPost == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+  <i class="layui-icon {{#  if(d.couldPost == 1){ }}layui-icon-ok{{#  } if(d.couldPost == -1) { }}layui-icon-close{{#  } if(d.couldPost === 0){ }}layui-icon-loading{{#  } }}"></i>
 </script>
 <script type="text/html" id="toolbarDemo">
   <div class="layui-btn-container">

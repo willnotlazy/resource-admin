@@ -97,7 +97,7 @@ class ArticleController extends AdminCheckAuth
                 ,'checked'     => vae_get_login_admin()['nickname']
                 ,'checkStatus' => 1
             ];
-            if ($param['couldPost'] == 0) {
+            if ($param['couldPost'] == -1) {
                 $data['checkStatus'] = -1;
                 $data['failReason'] = $param['reason'];
             }

@@ -40,13 +40,21 @@ class RuleController extends AdminCheckAuth
             if ($result !== true) {
                 return vae_assign(0,$result);
             } else {
-                $rid = \think\loader::model('AdminRule')->strict(false)->field(true)->insertGetId($param);
-                //自动为系统所有者管理组分配新增的节点
-                $group = \think\loader::model('AdminGroup')->find(1);
-                if(!empty($group)) {
-                    $group->rules = $group->rules.','.$rid;
-                    $group->save();
+                \think\Db::startTrans();
+                try{
+                    $rid = \think\loader::model('AdminRule')->strict(false)->field(true)->insertGetId($param);
+                    //自动为系统所有者管理组分配新增的节点
+                    $group = \think\loader::model('AdminGroup')->find(1);
+                    if(!empty($group)) {
+                        $group->rules = $group->rules.','.$rid;
+                        $group->save();
+                    }
+                    \think\Db::commit();
+                } catch (\Exception $e) {
+                    \think\Db::rollback();
+                    return vae_assign(0,'数据库错误');
                 }
+
                 return vae_assign();
             }
     	}

@@ -148,6 +148,26 @@ function vae_set_recursion($result,$pid=0,$format="L "){
     return $list;
 }
 
+
+// 管理员菜单递归排序
+function vae_set_admin_recursion($result,$pid=0,$format="L "){
+    /*记录排序后的类别数组*/
+    static $list=array();
+
+    foreach ($result as $k => $v){
+        if($v['pid']==$pid){
+            if($pid!=0){
+                $v['title']=$format.$v['title'];
+            }
+            /*将该类别的数据放入list中*/
+            $list[]=$v;
+            vae_set_admin_recursion($result,$v['id'],"  ".$format);
+        }
+    }
+    return $list;
+}
+
+
 function vae_list_to_tree($list, $pk = 'id', $pid = 'pid', $child = 'list', $root = 0)
 {
     // 创建Tree
@@ -423,4 +443,11 @@ function vae_get_slide($name)
     $slides = cache('VAE_SLIDE'.$name);
     
     return $slides;
+}
+
+// 获取会员信息
+function vae_get_member($id=0)
+{
+    $member = \think\Db::connect(\think\Config::get('resource'))->name('user')->field('id,username,thumb,level,accumulatedLoginDays,consecutiveLoginDays,couldLogin,email')->where(['id'=>$id])->find();
+    return $member;
 }

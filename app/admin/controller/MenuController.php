@@ -40,12 +40,21 @@ class MenuController extends AdminCheckAuth
             if ($result !== true) {
                 return vae_assign(0,$result);
             } else {
-                $mid = \think\loader::model('AdminMenu')->strict(false)->field(true)->insertGetId($param);
-                //自动为系统所有者管理组分配新增的菜单
-                $group = \think\loader::model('AdminGroup')->find(1);
-                if(!empty($group)) {
-                    $group->menus = $group->menus.','.$mid;
-                    $group->save();
+                \think\Db::startTrans();
+                try{
+                    $mid = \think\loader::model('AdminMenu')->strict(false)->field(true)->insertGetId($param);
+
+                    //自动为系统所有者管理组分配新增的菜单
+                    $group = \think\loader::model('AdminGroup')->find(1);
+                    if(!empty($group)) {
+                        $group->menus = $group->menus.','.$mid;
+                        $group->save();
+                    }
+                    \think\Db::commit();
+                } catch (\Exception $e)
+                {
+                    \think\Db::rollback();
+                    return vae_assign(0,'数据库错误');
                 }
                 //清除菜单缓存
                 \think\Cache::clear('VAE_ADMIN_MENU');
@@ -65,7 +74,14 @@ class MenuController extends AdminCheckAuth
             } else {
             	$data[$param['field']] = $param['value'];
             	$data['id'] = $param['id'];
-                \think\loader::model('AdminMenu')->strict(false)->field(true)->update($data);
+                \think\Db::startTrans();
+                try{
+                    \think\loader::model('AdminMenu')->strict(false)->field(true)->update($data);
+                    \think\Db::commit();
+                } catch (\Exception $e) {
+                    \think\Db::rollback();
+                }
+
                 //清除菜单缓存
                 \think\Cache::clear('VAE_ADMIN_MENU');
                 return vae_assign();
@@ -81,10 +97,15 @@ class MenuController extends AdminCheckAuth
         if ($count > 0) {
             return vae_assign(0,"该菜单下还有子菜单，无法删除！");
         }
-        if (\think\Db::name('AdminMenu')->delete($id) !== false) {
-            \think\Cache::clear('VAE_ADMIN_MENU');// 删除后台菜单缓存
-            return vae_assign(1,"删除菜单成功！");
-        } else {
+        \think\Db::startTrans();
+        try{
+            if (\think\Db::name('AdminMenu')->delete($id) !== false) {
+                \think\Db::commit();
+                \think\Cache::clear('VAE_ADMIN_MENU');// 删除后台菜单缓存
+                return vae_assign(1, "删除菜单成功！");
+            }
+        } catch (\Exception $e) {
+            \think\Db::rollback();
             return vae_assign(0,"删除失败！");
         }
     }

@@ -1,0 +1,1 @@
+<?php return ['smtp'=>'smtp.qq.com','username'=>'519478450@qq.com','password'=>'kpgabyctghelbhdi','port'=>'465','email'=>'resource_share@qq.com','from'=>'resource','template'=>''];

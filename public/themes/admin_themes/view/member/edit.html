@@ -33,8 +33,15 @@
     <div class="layui-form-item">
         <label class="layui-form-label">状态</label>
         <div class="layui-input-block">
-            <input type="radio" name="status" value="1" title="正常" {eq name="$member.couldLogin" value="1"}checked{/eq}>
-            <input type="radio" name="status" value="0" title="禁止登录" {eq name="$member.couldLogin" value="0"}checked{/eq}>
+            <input type="radio" name="couldLogin" value="1" title="正常" {eq name="$member.couldLogin" value="1"}checked{/eq}>
+            <input type="radio" name="couldLogin" value="-1" title="禁止登录" {eq name="$member.couldLogin" value="-1"}checked{/eq}>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">关小黑屋原因(禁止登录时填写)</label>
+        <div class="layui-input-block">
+            <textarea type="text" name="prisoner" class="layui-textarea"></textarea>
         </div>
     </div>
     <div class="layui-form-item">
@@ -75,7 +82,7 @@
         //监听提交
         form.on('submit(vaeform)', function(data){
             $.ajax({
-                url:"/admin/admin/editSubmit",
+                url:"/admin/member/editSubmit",
                 type:'post',
                 data:data.field,
                 success:function(e){

@@ -9,6 +9,7 @@
 // | Author: 听雨 < 389625819@qq.com >
 // +---------------------------------------------------------------------
 namespace app\admin\controller;
+use think\Db;
 use vae\controller\AdminCheckAuth;
 use app\common\model\Article as ArticleModel;
 use think\Config;
@@ -84,26 +85,37 @@ class ArticleController extends AdminCheckAuth
     //修改
     public function edit()
     {
-        return view('',['article'=>vae_get_article_info(vae_get_param('id'))]);
+        return view('',['article'=>vae_get_article_info(vae_get_param('id')),'author'=>vae_get_param('author')]);
     }
 
     //提交修改
     public function editSubmit()
     {
+        $reply_msg = array();
         if($this->request->isPost()){
             $param = vae_get_param();
             $data = [
                 'couldPost'    => $param['couldPost']
                 ,'checked'     => vae_get_login_admin()['nickname']
                 ,'checkStatus' => 1
+                ,'boutique'    => $param['boutique']
             ];
+            $reply_msg['reply_time'] = time();
+            $reply_msg['uid'] = $param['uid'];
+            $reply_msg['post_title'] = $param['title'];
             if ($param['couldPost'] == -1) {
                 $data['checkStatus'] = -1;
                 $data['failReason'] = $param['reason'];
+                $reply_msg['msg_content'] = '您的文章已审核完毕,因为部分内容不符合站内要求,该文章将不予以发布。';
+            }
+            else{
+                $reply_msg['msg_content'] = '您的文章已审核完毕,通过审核。';
             }
             $id = $param['postID'];
             unset($param);
             \think\Db::connect(Config::get('resource'))->name('user_post')->where(['postID'=>$id])->strict(false)->field(true)->update($data);
+            \think\Db::connect(Config::get('resource'))->name('msg_reply')->insert($reply_msg);
+            unset($reply_msg);
             \think\Cache::clear('VAE_ARTICLE_INFO');
             return vae_assign(1,'提交成功');
         }
